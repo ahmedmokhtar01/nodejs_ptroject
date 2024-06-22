@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now()) // defulate function set value if user doesn't put value
+  username  String    @unique
+  password  String
+  product   Product[] // this mean that the user have list of products (aggregetion)
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  name      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id])
+  updates   Update[]
+}
+
+enum UPDATE_STATUS {
+  IN_PROGRESS
+  LIVE
+  DEPRECATED
+  ARCHIVED
+}
+
+model Update {
+  id        String        @id @default(uuid())
+  createdAt DateTime      @default(now())
+  updateAt  DateTime
+  title     String
+  body      String
+  version   String? // it can be null value 
+  status    UPDATE_STATUS @default(IN_PROGRESS)
+  assets    String? // it can be null value 
+  productId String
+  product   Product       @relation(fields: [productId], references: [id])
+}
